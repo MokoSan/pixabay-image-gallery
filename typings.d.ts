@@ -12,7 +12,6 @@ interface SearchTextCallback {
     (text: string): void;
 }
 
-
 interface IImage {
     webformatURL : string
     user : string
