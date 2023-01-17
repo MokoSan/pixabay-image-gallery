@@ -1,85 +1,50 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import ImageCard from '../components/ImageCard'
+import ImageSearch from '../components/ImageSearch'
 
 const Home: NextPage = () => {
+
+  const [images, setImages]       = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [term, setTerm]           = useState('')
+
+  useEffect(() => {
+    const getData = async() => {
+      console.log(`Key: ${process.env.APP_PIXABAY_API_KEY}`)
+      const response = await fetch(`https://pixabay.com/api/?key=${process.env.NEXT_PUBLIC_PIXABAY_API_KEY}&q=${term}&image_type=photo&pretty=true`);
+      const result   = await response.json().then((r) => {
+        setImages(r.hits)
+        setIsLoading(false)
+      }).catch(console.error);
+    }
+
+    getData()
+  }, [term])
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <> 
       <Head>
-        <title>Create Next App</title>
+        <title>Image Gallery</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
+      <h1 className='text-3xl m-3 text-center'>Moko's Image Gallery</h1>
+      <p className='m-3 text-center'>Powered by Pixabay</p>
+      <ImageSearch searchText={(term : string) => setTerm(term)} />
 
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      {!isLoading && images.length === 0 && <h1 className='text-3xl text-center mx-auto mt-32'> No Images Found </h1> }
+      {isLoading ? <h1 className='text-3xl text-center mx-auto mt-32'> Loading... </h1> : 
+        <div className='container mx-auto p-4'>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:grid-cols-1">
+            {images.map((image, index) => (
+              <ImageCard key={index} image={image} />
+            ))}
+          </div>
         </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
-    </div>
+      }
+    </>
   )
 }
 
